@@ -1,4 +1,4 @@
-package com.example.mvvmfoodrecipesappproject.constans
+package com.example.mvvmfoodrecipesappproject.util
 
 class Constants {
 
