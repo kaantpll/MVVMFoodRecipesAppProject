@@ -1,9 +1,8 @@
-package com.example.mvvmfoodrecipesappproject
+package com.example.mvvmfoodrecipesappproject.viewmodels
 
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.AndroidViewModel
@@ -12,7 +11,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.mvvmfoodrecipesappproject.data.Repository
 import com.example.mvvmfoodrecipesappproject.model.FoodRecipe
 import com.example.mvvmfoodrecipesappproject.util.NetworkResult
-import kotlinx.coroutines.handleCoroutineException
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
