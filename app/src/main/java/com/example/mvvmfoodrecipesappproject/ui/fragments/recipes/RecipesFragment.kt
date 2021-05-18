@@ -7,20 +7,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mvvmfoodrecipesappproject.viewmodels.MainViewModel
 import com.example.mvvmfoodrecipesappproject.R
 import com.example.mvvmfoodrecipesappproject.adapters.RecipesAdapter
+import com.example.mvvmfoodrecipesappproject.databinding.FragmentRecipesBinding
 import com.example.mvvmfoodrecipesappproject.util.Constants.Companion.API_KEY
 import com.example.mvvmfoodrecipesappproject.util.NetworkResult
+import com.example.mvvmfoodrecipesappproject.util.observeOnce
 import com.example.mvvmfoodrecipesappproject.viewmodels.RecipesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_recipes.view.*
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RecipesFragment : Fragment() {
 
-    private lateinit var mView : View
+    private var _binding : FragmentRecipesBinding? = null
+    private val binding get()= _binding!!
+
+    private val args by navArgs<RecipesFragmentArgs>()
+
     private val mAdapter by lazy {RecipesAdapter()}
     private lateinit var recipesViewModel : RecipesViewModel
     private lateinit var mainViewModel : MainViewModel
@@ -35,16 +45,35 @@ class RecipesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        mView =  inflater.inflate(R.layout.fragment_recipes, container, false)
 
+        _binding = FragmentRecipesBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = this
+
+        binding.mainViewModel = mainViewModel
 
         setupRecyclerView()
 
-        requestApiData()
+        readDatabase()
+
+        binding.recipesFab.setOnClickListener {
+           findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+        }
 
 
-        return mView
+        return binding.root
+    }
+
+    private fun readDatabase() {
+        mainViewModel.readRecipes.observeOnce(viewLifecycleOwner,{database->
+            if(database.isNotEmpty() && !args.backFromBottomSheet)
+            {
+                mAdapter.setData(database[0].foodRecipes)
+                hideShimmerEffect()
+            }
+            else{
+                requestApiData()
+            }
+        })
     }
 
     private fun requestApiData(){
@@ -59,6 +88,7 @@ class RecipesFragment : Fragment() {
                 }
                 is NetworkResult.Error->{
                     hideShimmerEffect()
+                    loadDataFromCache()
                     Toast.makeText(requireContext(),response.message.toString(),Toast.LENGTH_SHORT).show()
                 }
                 is NetworkResult.Loading ->{
@@ -70,21 +100,38 @@ class RecipesFragment : Fragment() {
     }
 
 
+    private fun loadDataFromCache(){
+      lifecycleScope.launch {
+          mainViewModel.readRecipes.observe(viewLifecycleOwner,{
+              database->
+              if(database.isNotEmpty()){
+                  mAdapter.setData(database[0].foodRecipes)
+              }
+          })
+      }
+    }
+
 
     private fun setupRecyclerView(){
-        mView.recyclerview.adapter = mAdapter
-        mView.recyclerview.layoutManager = LinearLayoutManager(requireContext())
-        showShimmerEffect()
+      lifecycleScope.launch {
+          binding.recyclerview.adapter = mAdapter
+          binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
+          showShimmerEffect()
+      }
     }
 
     private fun showShimmerEffect(){
-        mView.recyclerview.showShimmer()
+        binding.recyclerview.showShimmer()
     }
 
     private fun hideShimmerEffect(){
-        mView.recyclerview.hideShimmer()
+        binding.recyclerview.hideShimmer()
     }
 
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
 
 }
