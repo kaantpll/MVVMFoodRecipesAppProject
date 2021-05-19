@@ -1,6 +1,7 @@
 package com.example.mvvmfoodrecipesappproject.ui.fragments.recipes
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,13 +17,17 @@ import com.example.mvvmfoodrecipesappproject.R
 import com.example.mvvmfoodrecipesappproject.adapters.RecipesAdapter
 import com.example.mvvmfoodrecipesappproject.databinding.FragmentRecipesBinding
 import com.example.mvvmfoodrecipesappproject.util.Constants.Companion.API_KEY
+import com.example.mvvmfoodrecipesappproject.util.NetworkListener
 import com.example.mvvmfoodrecipesappproject.util.NetworkResult
 import com.example.mvvmfoodrecipesappproject.util.observeOnce
 import com.example.mvvmfoodrecipesappproject.viewmodels.RecipesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_recipes.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class RecipesFragment : Fragment() {
 
@@ -34,6 +39,8 @@ class RecipesFragment : Fragment() {
     private val mAdapter by lazy {RecipesAdapter()}
     private lateinit var recipesViewModel : RecipesViewModel
     private lateinit var mainViewModel : MainViewModel
+
+    private lateinit var networkListener : NetworkListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,27 +60,47 @@ class RecipesFragment : Fragment() {
 
         setupRecyclerView()
 
-        readDatabase()
+        recipesViewModel.readBackOnline.observe(viewLifecycleOwner,{
+            recipesViewModel.backOnline = it
+        })
 
-        binding.recipesFab.setOnClickListener {
-           findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+        lifecycleScope.launch {
+            networkListener = NetworkListener()
+            networkListener.checkNetworkAvailability(requireContext())
+                    .collect{status ->
+                        Log.d("NetworkListener",status.toString())
+                        recipesViewModel.networkStatus = status
+                        recipesViewModel.showNetworkStatus()
+                        readDatabase()
+                    }
         }
 
+        binding.recipesFab.setOnClickListener {
+         if(recipesViewModel.networkStatus){
+             findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+         }
+            else{
+                recipesViewModel.showNetworkStatus()
+         }}
 
         return binding.root
     }
 
     private fun readDatabase() {
-        mainViewModel.readRecipes.observeOnce(viewLifecycleOwner,{database->
-            if(database.isNotEmpty() && !args.backFromBottomSheet)
-            {
-                mAdapter.setData(database[0].foodRecipes)
-                hideShimmerEffect()
-            }
-            else{
-                requestApiData()
-            }
-        })
+        lifecycleScope.launch {
+
+            mainViewModel.readRecipes.observeOnce(viewLifecycleOwner,{database->
+                if(database.isNotEmpty() && !args.backFromBottomSheet)
+                {
+                    mAdapter.setData(database[0].foodRecipes)
+                    hideShimmerEffect()
+                }
+                else{
+                    requestApiData()
+                }
+            })
+        }
+
     }
 
     private fun requestApiData(){
