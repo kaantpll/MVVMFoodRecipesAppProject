@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import coil.load
 import com.example.mvvmfoodrecipesappproject.R
 import com.example.mvvmfoodrecipesappproject.model.Result
+import com.example.mvvmfoodrecipesappproject.util.Constants.Companion.RECIPE_RESULT_KEY
 import kotlinx.android.synthetic.main.fragment_overview.view.*
 import org.jsoup.Jsoup
 
@@ -23,7 +24,7 @@ class OverviewFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_overview, container, false)
 
         val args = arguments
-        val myBundle: Result? = args?.getParcelable("recipeBundle")
+        val myBundle: Result? = args?.getParcelable(RECIPE_RESULT_KEY)
 
         view.main_imageView.load(myBundle?.image)
         view.title_textView.text = myBundle?.title

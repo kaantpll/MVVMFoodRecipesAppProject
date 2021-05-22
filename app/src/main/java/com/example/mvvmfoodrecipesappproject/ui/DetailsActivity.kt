@@ -1,6 +1,5 @@
 package com.example.mvvmfoodrecipesappproject.ui
 
-import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -9,10 +8,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.navArgs
 import com.example.mvvmfoodrecipesappproject.R
 import com.example.mvvmfoodrecipesappproject.adapters.PagerAdapter
-import com.example.mvvmfoodrecipesappproject.ui.fragments.overview.IngredientsFragment
-import com.example.mvvmfoodrecipesappproject.ui.fragments.overview.InstructionsFragment
+import com.example.mvvmfoodrecipesappproject.ui.fragments.ingredients.IngredientsFragment
+import com.example.mvvmfoodrecipesappproject.ui.fragments.instructions.InstructionsFragment
 import com.example.mvvmfoodrecipesappproject.ui.fragments.overview.OverviewFragment
-import dagger.hilt.android.AndroidEntryPoint
+import com.example.mvvmfoodrecipesappproject.util.Constants.Companion.RECIPE_RESULT_KEY
 import kotlinx.android.synthetic.main.activity_details.*
 
 
@@ -39,7 +38,7 @@ class DetailsActivity : AppCompatActivity() {
         titles.add("Instructions")
 
         val resultBundle = Bundle()
-        resultBundle.putParcelable("recipeBundle",args.result)
+        resultBundle.putParcelable(RECIPE_RESULT_KEY,args.result)
 
         val adapter = PagerAdapter(
             resultBundle,fragments,titles,supportFragmentManager
