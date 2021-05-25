@@ -1,4 +1,4 @@
-package com.example.mvvmfoodrecipesappproject.data.database
+package com.example.mvvmfoodrecipesappproject.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

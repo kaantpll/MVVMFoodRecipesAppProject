@@ -7,7 +7,8 @@ import android.net.NetworkCapabilities
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.example.mvvmfoodrecipesappproject.data.Repository
-import com.example.mvvmfoodrecipesappproject.data.database.RecipesEntity
+import com.example.mvvmfoodrecipesappproject.data.database.entities.FavoritesEntity
+import com.example.mvvmfoodrecipesappproject.data.database.entities.RecipesEntity
 import com.example.mvvmfoodrecipesappproject.model.FoodRecipe
 import com.example.mvvmfoodrecipesappproject.util.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -20,13 +21,30 @@ class MainViewModel @ViewModelInject constructor(
 
 
     /**Room Database*/
-    val readRecipes: LiveData<List<RecipesEntity>> = repository.local.readDatabase().asLiveData()
-    private fun insertRecipes(recipesEntity: RecipesEntity) {
+    val readRecipes: LiveData<List<RecipesEntity>> = repository.local.readRecipes().asLiveData()
+    val readFavoriteRecipes : LiveData<List<FavoritesEntity>> = repository.local.readFavoriteRecipes().asLiveData()
+
+     fun insertRecipes(recipesEntity: RecipesEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.local.insertRecipes(recipesEntity)
         }
     }
 
+
+     fun insertFavoriteRecipe(favoritesEntity: FavoritesEntity) =
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.local.insertFavoriteRecipes(favoritesEntity)
+            }
+
+     fun deleteFavoriteRecipe(favoritesEntity: FavoritesEntity) =
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.local.deleteFavoriteRecipe(favoritesEntity)
+            }
+
+     fun deleteAllFavoriteRecipes() =
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.local.deleteAllFavoriteRecipes()
+            }
 
     /** Retrofit*/
     var recipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> = MutableLiveData()
