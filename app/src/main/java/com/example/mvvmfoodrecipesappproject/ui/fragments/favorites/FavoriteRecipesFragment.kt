@@ -27,7 +27,7 @@ class FavoriteRecipesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+        
         _binding = FragmentFavoriteRecipesBinding.inflate(inflater,container,false)
         binding.lifecycleOwner = this
         binding.mainViewModel = mainViewModel
