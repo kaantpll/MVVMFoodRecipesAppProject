@@ -25,8 +25,8 @@ interface RecipesDao {
     @Query("SELECT * FROM recipes_table ORDER BY pid ASC")
     fun readRecipes() : Flow<List<RecipesEntity>>
 
-    @Query("SELECT * FROM food_joke_entity ORDER By mid ASC")
-    fun readFoodJoke() : Flow<List<FoodJoke>>
+    @Query("SELECT * FROM food_joke_entity ORDER By jokeId ASC")
+    fun readFoodJoke() : Flow<List<FoodJokeEntity>>
 
     @Query("SELECT * FROM favorite_recipes_table ORDER BY mid ASC")
     fun readFavoriteRecipes() : Flow<List<FavoritesEntity>>
